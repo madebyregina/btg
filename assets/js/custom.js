@@ -16,36 +16,33 @@ jQuery(document).ready(function ($) {
   });
 });
 
-$(document).ready(function () {
-  function checkVisibility() {
-    // Get all `.animate` elements and sort by offset from top
-    const $elements = $(".animate").sort((a, b) => $(a).offset().top - $(b).offset().top);
+document.addEventListener("DOMContentLoaded", () => {
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
 
-    $elements.each(function () {
-        const $el = $(this);
-        const elementTop = $el.offset().top;
-        const windowBottom = $(window).scrollTop() + $(window).height();
+        el.classList.add("visible");
 
-        if (elementTop < windowBottom - 10 && !$el.hasClass("visible")) {
-            $el.addClass("visible");
+        // Animate children with stagger
+        const children = el.children;
+        [...children].forEach((child, index) => {
+          setTimeout(() => {
+            child.classList.add("visible");
+          }, index * 300);
+        });
 
-            // Animate its children with a staggered delay
-            const $children = $el.children();
-            $children.each(function (index) {
-                const $this = $(this);
-                setTimeout(function () {
-                  $this.addClass("visible");
-                }, index * 200 ); 
-            });
-        }
+        // Optional: unobserve if you only want it to run once
+        observer.unobserve(el);
+      }
     });
-  }
+  }, {
+    threshold: 0
+  });
 
-  // Run on page load and scroll
-  checkVisibility();
-  $(window).on("load scroll resize", checkVisibility);
+  // Observe all `.animate` elements
+  document.querySelectorAll('.animate').forEach(el => observer.observe(el));
 });
-
 jQuery(document).ready(function ($) {
   // Initialize header scroll detection
   toggleHeaderClass('.header', 'scrolled-down', 'scrolled-up');
@@ -162,7 +159,7 @@ jQuery(document).ready(function ($) {
 
     // If URL contains a hash on page load
     if (window.location.hash) {
-      const target = $(window.location.hash);
+      const target = $(window.location.hash); 
 
       if (target.length) {
         setTimeout(function () {
